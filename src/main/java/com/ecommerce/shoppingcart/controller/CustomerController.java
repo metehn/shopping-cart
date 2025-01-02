@@ -2,6 +2,7 @@ package com.ecommerce.shoppingcart.controller;
 
 import com.ecommerce.shoppingcart.model.Customer;
 import com.ecommerce.shoppingcart.repository.CustomerRepository;
+import com.ecommerce.shoppingcart.service.CustomerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,12 +21,12 @@ import java.util.Optional;
 public class CustomerController {
 
     @Autowired
-    private CustomerRepository customerRepository;
+    CustomerService customerService;
 
     @PostMapping("/add")
     public ResponseEntity<String> addCustomer(@RequestBody Customer customer) {
         try {
-            customerRepository.save(customer);
+            customerService.save(customer);
             return ResponseEntity.ok("Customer added successfully.");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error adding customer.");
@@ -34,12 +35,12 @@ public class CustomerController {
 
     @GetMapping("/")
     public List<Customer> getAllCustomers() {
-        return customerRepository.findAll();
+        return customerService.findAll();
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<Customer> getCustomerById(@PathVariable long id) {
-        Optional<Customer> customer = customerRepository.findById(id);
+        Optional<Customer> customer = customerService.findById(id);
         if (customer.isPresent()) {
             return ResponseEntity.ok(customer.get());
         } else {

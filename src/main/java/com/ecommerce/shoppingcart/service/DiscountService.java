@@ -1,7 +1,7 @@
 package com.ecommerce.shoppingcart.service;
 
 import com.ecommerce.shoppingcart.model.CartProduct;
-import com.ecommerce.shoppingcart.model.response.PricesResponse;
+import com.ecommerce.shoppingcart.model.dto.PricesResponse;
 import com.ecommerce.shoppingcart.repository.CartProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -32,7 +32,7 @@ public class DiscountService {
         return response;
     }
 
-    public double getDiscount(double totalPrice) {
+    private double getDiscount(double totalPrice) {
         if (totalPrice > 200) {
             return 0.15;
         } else if (totalPrice >= 100) {

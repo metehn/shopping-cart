@@ -1,4 +1,4 @@
-package com.ecommerce.shoppingcart.model.response;
+package com.ecommerce.shoppingcart.model.dto;
 
 import lombok.Getter;
 import lombok.Setter;

@@ -1,7 +1,7 @@
 package com.ecommerce.shoppingcart.controller;
 
 import com.ecommerce.shoppingcart.model.dto.CartProductDTO;
-import com.ecommerce.shoppingcart.model.response.PricesResponse;
+import com.ecommerce.shoppingcart.model.dto.PricesResponse;
 import com.ecommerce.shoppingcart.service.ShoppingCartService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

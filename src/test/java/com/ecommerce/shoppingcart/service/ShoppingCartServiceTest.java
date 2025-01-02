@@ -6,7 +6,7 @@ import com.ecommerce.shoppingcart.model.Product;
 import com.ecommerce.shoppingcart.repository.BasketRepository;
 import com.ecommerce.shoppingcart.repository.CartProductRepository;
 import com.ecommerce.shoppingcart.repository.ProductRepository;
-import com.ecommerce.shoppingcart.model.response.PricesResponse;
+import com.ecommerce.shoppingcart.model.dto.PricesResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

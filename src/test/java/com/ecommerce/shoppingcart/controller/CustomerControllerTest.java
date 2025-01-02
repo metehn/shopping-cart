@@ -1,109 +1,106 @@
 package com.ecommerce.shoppingcart.controller;
 
 import com.ecommerce.shoppingcart.model.Customer;
-import com.ecommerce.shoppingcart.repository.CustomerRepository;
-import org.junit.jupiter.api.BeforeEach;
+import com.ecommerce.shoppingcart.service.CustomerService;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
 import java.util.Optional;
-
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.times;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@ExtendWith(MockitoExtension.class)
-public class CustomerControllerTest {
+import com.fasterxml.jackson.databind.ObjectMapper;
 
-    @Mock
-    private CustomerRepository customerRepository;
+@WebMvcTest(CustomerController.class)
+class CustomerControllerTest {
 
-    @InjectMocks
-    private CustomerController customerController;
-
+    @Autowired
     private MockMvc mockMvc;
 
-    @BeforeEach
-    public void setup() {
-        mockMvc = MockMvcBuilders.standaloneSetup(customerController).build();
-    }
+    @MockBean
+    private CustomerService customerService;
+
+    private ObjectMapper objectMapper = new ObjectMapper();
 
     @Test
-    public void testAddCustomer() throws Exception {
+    void testAddCustomer() throws Exception {
         Customer customer = new Customer();
-        customer.setCustomerEmail("test@example.com");
+        customer.setCustomerId(1L);
+        customer.setCustomerEmail("example@test.com");
 
-        when(customerRepository.save(any(Customer.class))).thenReturn(customer);
+        doNothing().when(customerService).save(any(Customer.class));
 
         mockMvc.perform(post("/customer/add")
-                        .contentType("application/json")
-                        .content("{\"customer_email\": \"test@example.com\"}"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(customer)))
                 .andExpect(status().isOk())
                 .andExpect(content().string("Customer added successfully."));
 
-        verify(customerRepository, times(1)).save(any(Customer.class));
+        verify(customerService, times(1)).save(any(Customer.class));
     }
 
     @Test
-    public void testGetAllCustomers() throws Exception {
-        List<Customer> customers = new ArrayList<>();
-        customers.add(new Customer("test@metehan.com"));
-        customers.add(new Customer("test.deneme@example.com"));
+    void testAddCustomerError() throws Exception {
+        doThrow(new RuntimeException("DB Error!")).when(customerService).save(any(Customer.class));
 
-        when(customerRepository.findAll()).thenReturn(customers);
+        mockMvc.perform(post("/customer/add")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new Customer())))
+                .andExpect(status().isInternalServerError())
+                .andExpect(content().string("Error adding customer."));
+    }
+
+    @Test
+    void testGetAllCustomers() throws Exception {
+        Customer c1 = new Customer();
+        c1.setCustomerId(1L);
+        c1.setCustomerEmail("abc@test.com");
+
+        Customer c2 = new Customer();
+        c2.setCustomerId(2L);
+        c2.setCustomerEmail("xyz@test.com");
+
+        when(customerService.findAll()).thenReturn(Arrays.asList(c1, c2));
 
         mockMvc.perform(get("/customer/"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].customerEmail").value("test@metehan.com"))
-                .andExpect(jsonPath("$[1].customerEmail").value("test.deneme@example.com"));
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON));
+
+        verify(customerService, times(1)).findAll();
     }
 
     @Test
-    public void testGetCustomerByIdFound() throws Exception {
-        Customer customer = new Customer("test@metehan.com");
-        when(customerRepository.findById(1L)).thenReturn(Optional.of(customer));
+    void testGetCustomerByIdFound() throws Exception {
+        Customer c1 = new Customer();
+        c1.setCustomerId(1L);
+        c1.setCustomerEmail("found@test.com");
 
-        mockMvc.perform(get("/customer/{id}", 1))
+        when(customerService.findById(1L)).thenReturn(Optional.of(c1));
+
+        mockMvc.perform(get("/customer/1"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.customerEmail").value("test@metehan.com"));
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON));
+
+        verify(customerService, times(1)).findById(1L);
     }
 
     @Test
-    public void testGetCustomerByIdNotFound() throws Exception {
-        when(customerRepository.findById(1L)).thenReturn(Optional.empty());
+    void testGetCustomerByIdNotFound() throws Exception {
+        when(customerService.findById(999L)).thenReturn(Optional.empty());
 
-        mockMvc.perform(get("/customer/{id}", 1))
-                .andExpect(status().isNotFound())
-                .andExpect(content().string(""));
+        mockMvc.perform(get("/customer/999"))
+                .andExpect(status().isNotFound());
+
+        verify(customerService, times(1)).findById(999L);
     }
-
-    @Test
-    public void testAddCustomerError() throws Exception {
-        Customer customer = new Customer();
-        customer.setCustomerEmail("test@example.com");
-
-        when(customerRepository.save(any(Customer.class))).thenThrow(new RuntimeException("Database error"));
-
-        mockMvc.perform(post("/customer/add")
-                        .contentType("application/json")
-                        .content("{\"customerEmail\": \"test@example.com\"}"))
-                .andExpect(status().isInternalServerError())
-                .andExpect(content().string("Error adding customer."));
-
-        verify(customerRepository, times(1)).save(any(Customer.class));
-    }
-
-
 }

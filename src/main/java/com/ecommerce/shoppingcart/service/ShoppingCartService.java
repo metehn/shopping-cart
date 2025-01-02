@@ -3,7 +3,7 @@ package com.ecommerce.shoppingcart.service;
 import com.ecommerce.shoppingcart.model.Basket;
 import com.ecommerce.shoppingcart.model.CartProduct;
 import com.ecommerce.shoppingcart.model.Product;
-import com.ecommerce.shoppingcart.model.response.PricesResponse;
+import com.ecommerce.shoppingcart.model.dto.PricesResponse;
 import com.ecommerce.shoppingcart.repository.CartProductRepository;
 import com.ecommerce.shoppingcart.repository.BasketRepository;
 import com.ecommerce.shoppingcart.repository.ProductRepository;
@@ -28,7 +28,7 @@ public class ShoppingCartService {
         return discountService.calculateTotalPriceWithDiscount(basketId);
     }
 
-    public String addProductToBasket(Long basketId, Long productId, int quantity) {
+    public String addProductToBasket(long basketId, long productId, int quantity) throws  RuntimeException {
         Basket basket = basketRepository.findById(basketId).orElseThrow(() -> new RuntimeException("Basket not found"));
 
         Product product = productRepository.findById(productId).orElseThrow(() -> new RuntimeException("Product not found"));
@@ -47,7 +47,7 @@ public class ShoppingCartService {
         return "Product added to basket successfully!";
     }
 
-    public String removeProductFromBasket(Long basketId, Long productId) {
+    public String removeProductFromBasket(long basketId, long productId) throws RuntimeException{
         Basket basket = basketRepository.findById(basketId).orElseThrow(() -> new RuntimeException("Basket not found"));
 
         CartProduct cartProduct = basket.getBasketItems().stream()
@@ -64,7 +64,7 @@ public class ShoppingCartService {
         return "Product removed from basket successfully!";
     }
 
-    public String updateProductQuantity(Long basketId, Long productId, int newQuantity) {
+    public String updateProductQuantity(long basketId, long productId, int newQuantity) throws  RuntimeException {
         Basket basket = basketRepository.findById(basketId).orElseThrow(() -> new RuntimeException("Basket not found"));
 
         CartProduct cartProduct = basket.getBasketItems().stream()
@@ -72,16 +72,19 @@ public class ShoppingCartService {
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("Product not found in basket"));
 
-        if (newQuantity < 1) {
+        if (newQuantity < 0) {
             throw new RuntimeException("Quantity cannot be less than 1");
+        }else if(newQuantity == 0){
+            removeProductFromBasket(basketId, productId);
+            return "Product removed from basket successfully!";
+        }else{
+            cartProduct.setCartQuantity(newQuantity);
+            cartProduct.setCartPrice(cartProduct.getProduct().getProductPrice() * newQuantity);
+
+            cartProductRepository.save(cartProduct);
+            return "Product quantity updated successfully!";
         }
 
-        cartProduct.setCartQuantity(newQuantity);
-        cartProduct.setCartPrice(cartProduct.getProduct().getProductPrice() * newQuantity);
-
-        cartProductRepository.save(cartProduct);
-
-        return "Product quantity updated successfully!";
     }
 
 }
