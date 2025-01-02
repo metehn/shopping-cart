@@ -9,10 +9,10 @@ INSERT INTO "customer" ("customer_email") VALUES ('john.doe@example.com');
 INSERT INTO "basket" ("customer_id") VALUES (1);
 
 INSERT INTO "cart_product" ("product_id", "cart_quantity", "cart_price", "basket_id")
-VALUES (1, 2, 14800 * 2, 1);
+VALUES (1, 2, 14800, 1);
 
 INSERT INTO "cart_product" ("product_id", "cart_quantity", "cart_price", "basket_id")
-VALUES (2, 3, 100 * 3, 1);
+VALUES (2, 3, 100, 1);
 
 INSERT INTO "cart_product" ("product_id", "cart_quantity", "cart_price", "basket_id")
 VALUES (3, 1, 1850.90, 1);

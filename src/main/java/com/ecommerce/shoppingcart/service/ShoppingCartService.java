@@ -49,7 +49,7 @@ public class ShoppingCartService {
             cartProduct.setBasket(basket);
             cartProduct.setProduct(product);
             cartProduct.setCartQuantity(quantity);
-            cartProduct.setCartPrice(product.getProductPrice() * quantity);
+            cartProduct.setCartPrice(product.getProductPrice());
 
             basket.getBasketItems().add(cartProduct);
 
@@ -92,7 +92,7 @@ public class ShoppingCartService {
             return "Product removed from basket successfully!";
         }else{
             cartProduct.setCartQuantity(newQuantity);
-            cartProduct.setCartPrice(cartProduct.getProduct().getProductPrice() * newQuantity);
+            cartProduct.setCartPrice(cartProduct.getProduct().getProductPrice());
 
             cartProductRepository.save(cartProduct);
             return "Product quantity updated successfully!";
