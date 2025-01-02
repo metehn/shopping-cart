@@ -6,7 +6,7 @@ Implemented a shopping cart application with given instructions. Used Spring Boo
 Below flow chart folowed in development.
 
 ![](images/chart.png)
-
+![](images/diagram.png)
 
 ## Requirements
  In this assignment, you are only expected to focus on the shopping cart and discount functions.
@@ -29,7 +29,6 @@ Implemented a rest controller for each service. These controllers controls only 
 
 Swagger doc: http://localhost:8080/swagger-ui/index.html
 ```yaml
-
 openapi: "3.0.1"
 info:
   title: "OpenAPI definition"
@@ -247,7 +246,6 @@ components:
         discountPrice:
           type: number
           format: double
-
 ```
 
 Jacoco result: http://localhost:63342/shopping-cart/shoppingcart/target/site/jacoco/index.html
