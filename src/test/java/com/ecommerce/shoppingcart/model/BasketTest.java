@@ -19,12 +19,10 @@ public class BasketTest {
         basket.setCustomer(customer);
 
         CartProduct cartProduct = new CartProduct();
-        cartProduct.setCartProductId(1L);
         basket.setBasketItems(List.of(cartProduct));
 
         assertThat(basket.getBasketId()).isEqualTo(1L);
         assertThat(basket.getCustomer().getCustomerEmail()).isEqualTo("test@example.com");
         assertThat(basket.getBasketItems()).hasSize(1);
-        assertThat(basket.getBasketItems().get(0).getCartProductId()).isEqualTo(1L);
     }
 }

@@ -2,6 +2,7 @@ package com.ecommerce.shoppingcart.service;
 
 import com.ecommerce.shoppingcart.model.Basket;
 import com.ecommerce.shoppingcart.model.CartProduct;
+import com.ecommerce.shoppingcart.model.CartProductId;
 import com.ecommerce.shoppingcart.model.Product;
 import com.ecommerce.shoppingcart.repository.BasketRepository;
 import com.ecommerce.shoppingcart.repository.CartProductRepository;
@@ -13,6 +14,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import java.util.ArrayList;
@@ -246,4 +249,35 @@ public class ShoppingCartServiceTest {
         assertThat(response).isEqualTo("Product quantity updated successfully!");
     }
 
+    @Test
+    public void testAddExistingProductThrowsException() {
+        Basket basket = new Basket();
+        basket.setBasketId(1L);
+
+        Product product = new Product();
+        product.setProductId(1L);
+        product.setProductName("Laptop");
+        product.setProductPrice(1000.00);
+
+        CartProduct existingCartProduct = new CartProduct();
+        existingCartProduct.setCartProductId(new CartProductId(1L, 1L));
+        existingCartProduct.setBasket(basket);
+        existingCartProduct.setProduct(product);
+        existingCartProduct.setCartQuantity(2);
+        existingCartProduct.setCartPrice(2000.00);
+
+        when(basketRepository.findById(1L)).thenReturn(Optional.of(basket));
+        when(productRepository.findById(1L)).thenReturn(Optional.of(product));
+        when(cartProductRepository.findByBasket_BasketIdAndProduct_ProductId(1L, 1L))
+                .thenReturn(Optional.of(existingCartProduct));
+
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+            shoppingCartService.addProductToBasket(1L, 1L, 3);
+        });
+
+        assertThat(exception.getMessage()).isEqualTo("Product already exists!");
+
+        verify(cartProductRepository, never()).save(any(CartProduct.class));
+        verify(basketRepository, never()).save(any(Basket.class));
+    }
 }

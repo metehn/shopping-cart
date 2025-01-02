@@ -2,6 +2,7 @@ package com.ecommerce.shoppingcart.service;
 
 import com.ecommerce.shoppingcart.model.Basket;
 import com.ecommerce.shoppingcart.model.CartProduct;
+import com.ecommerce.shoppingcart.model.CartProductId;
 import com.ecommerce.shoppingcart.model.Product;
 import com.ecommerce.shoppingcart.model.dto.PricesResponse;
 import com.ecommerce.shoppingcart.repository.CartProductRepository;
@@ -9,8 +10,12 @@ import com.ecommerce.shoppingcart.repository.BasketRepository;
 import com.ecommerce.shoppingcart.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
 
 @Service
+@Transactional
 public class ShoppingCartService {
 
     @Autowired
@@ -28,23 +33,31 @@ public class ShoppingCartService {
         return discountService.calculateTotalPriceWithDiscount(basketId);
     }
 
-    public String addProductToBasket(long basketId, long productId, int quantity) throws  RuntimeException {
+    public String addProductToBasket(Long basketId, Long productId, int quantity) throws RuntimeException {
         Basket basket = basketRepository.findById(basketId).orElseThrow(() -> new RuntimeException("Basket not found"));
-
         Product product = productRepository.findById(productId).orElseThrow(() -> new RuntimeException("Product not found"));
 
-        CartProduct cartProduct = new CartProduct();
-        cartProduct.setProduct(product);
-        cartProduct.setCartQuantity(quantity);
-        cartProduct.setCartPrice(product.getProductPrice() * quantity);
-        cartProduct.setBasket(basket);
+        Optional<CartProduct> existingCartProductOpt = cartProductRepository.findByBasket_BasketIdAndProduct_ProductId(basketId, productId);
 
-        basket.getBasketItems().add(cartProduct);
+        if (existingCartProductOpt.isPresent()) {
+            throw new RuntimeException("Product already exists!");
+        } else {
+            CartProduct cartProduct = new CartProduct();
+            CartProductId cartProductId = new CartProductId(basketId, productId);
+            cartProduct.setCartProductId(cartProductId);
 
-        cartProductRepository.save(cartProduct);
-        basketRepository.save(basket);
+            cartProduct.setBasket(basket);
+            cartProduct.setProduct(product);
+            cartProduct.setCartQuantity(quantity);
+            cartProduct.setCartPrice(product.getProductPrice() * quantity);
 
-        return "Product added to basket successfully!";
+            basket.getBasketItems().add(cartProduct);
+
+            cartProductRepository.save(cartProduct);
+            basketRepository.save(basket);
+
+            return "Product added to basket successfully!";
+        }
     }
 
     public String removeProductFromBasket(long basketId, long productId) throws RuntimeException{
