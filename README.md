@@ -27,7 +27,7 @@ The REST API you provide should support at least the following functionalities:
 ## Test and Proof
 Implemented a rest controller for each service. These controllers controls only their own responsibility. Used springfox for swagger documentation and manual testing. Used Jacoco to see coverage result.
 
-Swagger doc: http://localhost:8080/swagger-ui/index.html
+Swagger doc: http://localhost:8080/swagger-ui/index.html (Note: before running it you may need to set maven home path in maven setting)
 ```yaml
 openapi: "3.0.1"
 info:
@@ -248,7 +248,7 @@ components:
           format: double
 ```
 
-Jacoco result: http://localhost:63342/shopping-cart/shoppingcart/target/site/jacoco/index.html
+Jacoco result: http://localhost:63342/shopping-cart/shoppingcart/target/site/jacoco/index.html (Note: before running it, you may need to set maven home path in maven setting)
 ![](images/coverage.png)
 
 
